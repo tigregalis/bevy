@@ -24,5 +24,6 @@ bevy_type_registry = { path = "../bevy_type_registry", version = "0.2.1" }
 bevy_utils = { path = "../bevy_utils", version = "0.2.1" }
 
 # other
-ab_glyph = "0.2.5"
+ab_glyph = "0.2.6"
 anyhow = "1.0"
+glyph_brush_layout = "0.2.0"

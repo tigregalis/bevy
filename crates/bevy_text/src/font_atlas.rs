@@ -1,3 +1,4 @@
+use ab_glyph::GlyphId;
 use bevy_asset::{Assets, Handle};
 use bevy_math::Vec2;
 use bevy_render::texture::{Texture, TextureFormat};
@@ -7,6 +8,7 @@ use bevy_utils::HashMap;
 pub struct FontAtlas {
     pub dynamic_texture_atlas_builder: DynamicTextureAtlasBuilder,
     pub glyph_to_index: HashMap<char, u32>,
+    pub glyph_id_to_char: HashMap<GlyphId, char>,
     pub texture_atlas: Handle<TextureAtlas>,
 }
 
@@ -25,6 +27,7 @@ impl FontAtlas {
         Self {
             texture_atlas: texture_atlases.add(texture_atlas),
             glyph_to_index: HashMap::default(),
+            glyph_id_to_char: HashMap::default(),
             dynamic_texture_atlas_builder: DynamicTextureAtlasBuilder::new(size, 1),
         }
     }
@@ -39,6 +42,7 @@ impl FontAtlas {
         texture_atlases: &mut Assets<TextureAtlas>,
         character: char,
         texture: &Texture,
+        glyph_id: GlyphId,
     ) -> bool {
         let texture_atlas = texture_atlases.get_mut(&self.texture_atlas).unwrap();
         if let Some(index) =
@@ -46,6 +50,7 @@ impl FontAtlas {
                 .add_texture(texture_atlas, textures, texture)
         {
             self.glyph_to_index.insert(character, index);
+            self.glyph_id_to_char.insert(glyph_id, character);
             true
         } else {
             false

@@ -31,3 +31,4 @@ bevy_utils = { path = "../bevy_utils", version = "0.2.1" }
 
 # other
 stretch = "0.3"
+# ab_glyph = "0.2.6"

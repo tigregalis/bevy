@@ -1,4 +1,5 @@
 use ab_glyph::{FontVec, Glyph, InvalidFont, OutlinedGlyph, Point, PxScale, ScaleFont};
+use glyph_brush_layout::{FontId, GlyphPositioner, Layout, SectionGeometry, SectionText};
 use bevy_math::Vec2;
 use bevy_render::{
     color::Color,
@@ -53,6 +54,29 @@ impl Font {
                 .collect::<Vec<u8>>(),
             TextureFormat::Rgba8UnormSrgb,
         )
+    }
+
+    pub fn build_relative_layout(
+        &self,
+        text: &str,
+        font_size: f32,
+    ) -> Vec<Glyph> {
+        let mut section_glyphs = Layout::default_wrap().calculate_glyphs(
+            &[&self.font],
+            &SectionGeometry {
+                screen_position: (0.0, 0.0),
+                ..SectionGeometry::default()
+            },
+            &[
+                SectionText {
+                    text,
+                    scale: PxScale::from(font_size),
+                    font_id: FontId(0),
+                },
+            ],
+        );
+        let glyphs: Vec<Glyph> = section_glyphs.drain(..).map(|section_glyph| section_glyph.glyph).collect();
+        glyphs
     }
 
     // adapted from ab_glyph example: https://github.com/alexheretic/ab-glyph/blob/master/dev/examples/image.rs

@@ -15,6 +15,7 @@ use bevy_render::{
 };
 use bevy_sprite::{ColorMaterial, QUAD_HANDLE};
 use bevy_transform::prelude::{GlobalTransform, Transform};
+use bevy_text::GlyphLayout;
 
 #[derive(Bundle, Clone, Debug)]
 pub struct NodeComponents {
@@ -118,6 +119,7 @@ pub struct TextComponents {
     pub focus_policy: FocusPolicy,
     pub transform: Transform,
     pub global_transform: GlobalTransform,
+    pub glyph_layout: GlyphLayout,
 }
 
 impl Default for TextComponents {
@@ -134,6 +136,7 @@ impl Default for TextComponents {
             style: Default::default(),
             transform: Default::default(),
             global_transform: Default::default(),
+            glyph_layout: Default::default(),
         }
     }
 }
