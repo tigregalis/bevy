@@ -112,7 +112,6 @@ impl FontAtlasSet {
             max_y = max_y.max(glyph.position.y - scaled_font.descent());
         }
         let size = Size::new(max_x, max_y);
-        // dbg!(&size);
         Some(size)
     }
 

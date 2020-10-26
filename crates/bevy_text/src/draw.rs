@@ -46,19 +46,7 @@ pub struct DrawableText<'a> {
 
 impl<'a> Drawable for DrawableText<'a> {
     fn draw(&mut self, draw: &mut Draw, context: &mut DrawContext) -> Result<(), DrawError> {
-        // println!();
-        // println!();
-        // println!();
-        // println!();
-        // println!();
-        // println!();
-        // println!();
-        // dbg!(&self.glyph_layout);
-        // TODO: NEXT:
-        // - Map GlyphId -> Char (needed for .get_glyph_atlas_info()), potentially can be stored on AtlasInfo
-        // - Fix layout with appropriate offsets
-        // - Verify calculated height/width
-        // TODO: STRETCH
+        // TODO:
         // - Call `outline_glyph only` once and store the `OutlineGlyph`s
         // - Provide other options for features (fixed / max width, h-align, multi-style text using sections)
         // - Test performance
@@ -92,8 +80,6 @@ impl<'a> Drawable for DrawableText<'a> {
             }
         }
 
-        // dbg!(&self.glyph_layout);
-
         // set global bindings
         context.set_bind_groups_from_bindings(draw, &mut [self.render_resource_bindings])?;
 
@@ -101,24 +87,19 @@ impl<'a> Drawable for DrawableText<'a> {
         let font = &self.font.font;
         let scale = PxScale::from(self.style.font_size);
         let scaled_font = ab_glyph::Font::as_scaled(&font, scale);
-        dbg!(self.style.font_size);
-        let mut error_correction = (scaled_font.ascent() + scaled_font.descent()) / 2.0;
-        error_correction -= error_correction.floor();
-        dbg!(error_correction);
-        let caret = self.position;
         let glyphs = &self.glyph_layout.glyphs;
-        dbg!(&caret);
+        // vertical axis of glyph position (up = -) is opposite that of transform (up = +)
         // caret (transform) is the bottom left corner of the text rectangle
-        // vertical scale of glyph position is opposite of transform
-
-        // max_y is the height of the text rectangle
+        // max_y (glyph position) is the height of the text rectangle, i.e. the bottom edge of the text rectangle
+        // caret + |max_y| therefore is the top left corner of the text rectangle
+        let caret = self.position;
         let mut max_y: f32 = 0.0;
         for glyph in glyphs.iter() {
             max_y = max_y.max(glyph.position.y - scaled_font.descent());
         }
         max_y = max_y.floor();
-        dbg!(max_y);
 
+        // set local per-character bindings
         for glyph in glyphs.iter() {
             if let Some(glyph_atlas_info) = self
                 .font_atlas_set
@@ -146,19 +127,7 @@ impl<'a> Drawable for DrawableText<'a> {
                     // the 0.5 accounts for odd-numbered heights (bump up by 1 pixel)
                     let y = max_y - bounds.max.y + glyph_height / 2.0 + 0.5;
                     let transform = Mat4::from_translation(caret + Vec3::new(x, y, 0.0));
-                    // if self.style.color == Color::BLACK && scaled_font.glyph_id('N') == glyph.id {
-                    //     println!();
-                    //     dbg!(caret.y(), bounds.min.y, bounds.max.y, glyph_height, offset, caret.y() + glyph_height / 2.0 - bounds.max.y + offset);
-                    // }
-                    if let Some(character) = self.font_atlas_set.get_char(self.style.font_size, &glyph.id) {
-                        if glyph_rect.height() != bounds.height() {
-                            println!("h: {} {}", character, glyph_rect.height() - bounds.height());
-                        }
-                        if glyph_rect.width() != bounds.width() {
-                            println!("w: {} {}", character, glyph_rect.width() - bounds.width());
-                        }
-                    };
-                    
+
                     let sprite = TextureAtlasSprite {
                         index: glyph_atlas_info.char_index,
                         color: self.style.color,
@@ -181,79 +150,8 @@ impl<'a> Drawable for DrawableText<'a> {
                     draw.draw_indexed(indices.clone(), 0, 0..1);
                 }
             }
-
         }
 
-        // set local per-character bindings
-        // for character in self.text.chars() {
-        //     if character.is_control() {
-        //         if character == '\n' {
-        //             caret.set_x(self.position.x());
-        //             // TODO: Necessary to also calculate scaled_font.line_gap() in here?
-        //             caret.set_y(caret.y() - scaled_font.height());
-        //         }
-        //         continue;
-        //     }
-
-        //     let glyph = scaled_font.scaled_glyph(character);
-        //     if let Some(last_glyph) = last_glyph.take() {
-        //         caret.set_x(caret.x() + scaled_font.kern(last_glyph.id, glyph.id));
-        //     }
-        //     if let Some(glyph_atlas_info) = self
-        //         .font_atlas_set
-        //         .get_glyph_atlas_info(self.style.font_size, character)
-        //     {
-        //         if let Some(outlined) = scaled_font.outline_glyph(glyph.clone()) {
-        //             let texture_atlas = self
-        //                 .texture_atlases
-        //                 .get(&glyph_atlas_info.texture_atlas)
-        //                 .unwrap();
-        //             let glyph_rect = texture_atlas.textures[glyph_atlas_info.char_index as usize];
-        //             let glyph_width = glyph_rect.width();
-        //             let glyph_height = glyph_rect.height();
-        //             let atlas_render_resource_bindings = self
-        //                 .asset_render_resource_bindings
-        //                 .get_mut(&glyph_atlas_info.texture_atlas)
-        //                 .unwrap();
-        //             context.set_bind_groups_from_bindings(
-        //                 draw,
-        //                 &mut [atlas_render_resource_bindings],
-        //             )?;
-
-        //             let bounds = outlined.px_bounds();
-        //             let transform = Mat4::from_translation(
-        //                 caret
-        //                     + Vec3::new(
-        //                         glyph_width / 2.0 + bounds.min.x,
-        //                         glyph_height / 2.0 - bounds.max.y + offset,
-        //                         0.0,
-        //                     ),
-        //             );
-        //             let sprite = TextureAtlasSprite {
-        //                 index: glyph_atlas_info.char_index,
-        //                 color: self.style.color,
-        //             };
-
-        //             let transform_buffer = context
-        //                 .shared_buffers
-        //                 .get_buffer(&transform, BufferUsage::UNIFORM)
-        //                 .unwrap();
-        //             let sprite_buffer = context
-        //                 .shared_buffers
-        //                 .get_buffer(&sprite, BufferUsage::UNIFORM)
-        //                 .unwrap();
-        //             let sprite_bind_group = BindGroup::build()
-        //                 .add_binding(0, transform_buffer)
-        //                 .add_binding(1, sprite_buffer)
-        //                 .finish();
-        //             context.create_bind_group_resource(2, &sprite_bind_group)?;
-        //             draw.set_bind_group(2, &sprite_bind_group);
-        //             draw.draw_indexed(indices.clone(), 0, 0..1);
-        //         }
-        //     }
-        //     caret.set_x(caret.x() + scaled_font.h_advance(glyph.id));
-        //     last_glyph = Some(glyph);
-        // }
         Ok(())
     }
 }
