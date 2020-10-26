@@ -83,17 +83,6 @@ pub fn text_atlas_system(
                 // resource generation needs to happen AFTER the render graph systems. maybe draw systems should execute within the
                 // render graph so ordering like this can be taken into account? Maybe the RENDER_GRAPH_SYSTEMS stage should be removed entirely
                 // in favor of node.update()? Regardless, in the immediate short term the current approach is fine.
-                // if let Some(width) = font_atlases.add_glyphs_to_atlas(
-                //     &fonts,
-                //     &mut texture_atlases,
-                //     &mut textures,
-                //     text.style.font_size,
-                //     &text.value,
-                // ) {
-                //     calculated_size.size = Size::new(width, text.style.font_size);
-                // } else {
-                //     new_queued_text.push(entity);
-                // }
                 if let Some(size) = font_atlases.add_glyphs_to_atlas(
                     &fonts,
                     &mut texture_atlases,
@@ -122,17 +111,6 @@ pub fn text_atlas_system(
         // resource generation needs to happen AFTER the render graph systems. maybe draw systems should execute within the
         // render graph so ordering like this can be taken into account? Maybe the RENDER_GRAPH_SYSTEMS stage should be removed entirely
         // in favor of node.update()? Regardless, in the immediate short term the current approach is fine.
-        // if let Some(width) = font_atlases.add_glyphs_to_atlas(
-        //     &fonts,
-        //     &mut texture_atlases,
-        //     &mut textures,
-        //     text.style.font_size,
-        //     &text.value,
-        // ) {
-        //     calculated_size.size = Size::new(width, text.style.font_size);
-        // } else {
-        //     new_queued_text.push(entity);
-        // }
         if let Some(size) = font_atlases.add_glyphs_to_atlas(
             &fonts,
             &mut texture_atlases,
