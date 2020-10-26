@@ -1,5 +1,4 @@
 use crate::{Font, FontAtlas};
-use ab_glyph::{Glyph, ScaleFont, GlyphId};
 use bevy_asset::{Assets, Handle};
 use bevy_core::FloatOrd;
 use bevy_math::{Size, Vec2};
@@ -7,6 +6,7 @@ use bevy_render::texture::Texture;
 use bevy_sprite::TextureAtlas;
 use bevy_type_registry::TypeUuid;
 use bevy_utils::HashMap;
+use glyph_brush_layout::ab_glyph::{Glyph, GlyphId, ScaleFont};
 
 // work around rust's f32 order/hash limitations
 type FontSizeKey = FloatOrd;
@@ -82,7 +82,13 @@ impl FontAtlasSet {
                     // there is a mismatch between the size of this texture
                     // and the size of the outlined glyph
                     let add_char_to_font_atlas = |atlas: &mut FontAtlas| -> bool {
-                        atlas.add_char(textures, texture_atlases, character, &glyph_texture, glyph_id)
+                        atlas.add_char(
+                            textures,
+                            texture_atlases,
+                            character,
+                            &glyph_texture,
+                            glyph_id,
+                        )
                     };
                     if !font_atlases.iter_mut().any(add_char_to_font_atlas) {
                         font_atlases.push(FontAtlas::new(
@@ -116,19 +122,20 @@ impl FontAtlasSet {
     }
 
     pub fn get_char(&self, font_size: f32, glyph_id: &GlyphId) -> Option<&char> {
-        self
-            .font_atlases
+        self.font_atlases
             .get(&FloatOrd(font_size))
             .and_then(|font_atlas| {
                 font_atlas
                     .iter()
-                    .find_map(|atlas| {
-                        atlas.glyph_id_to_char.get(&glyph_id)
-                    })
+                    .find_map(|atlas| atlas.glyph_id_to_char.get(&glyph_id))
             })
     }
 
-    pub fn get_glyph_atlas_info(&self, font_size: f32, glyph_id: &GlyphId) -> Option<GlyphAtlasInfo> {
+    pub fn get_glyph_atlas_info(
+        &self,
+        font_size: f32,
+        glyph_id: &GlyphId,
+    ) -> Option<GlyphAtlasInfo> {
         self.font_atlases
             .get(&FloatOrd(font_size))
             .and_then(|font_atlas| {
@@ -150,5 +157,5 @@ impl FontAtlasSet {
 
 #[derive(Clone, Debug, Default)]
 pub struct GlyphLayout {
-    pub glyphs: Vec<Glyph>
+    pub glyphs: Vec<Glyph>,
 }

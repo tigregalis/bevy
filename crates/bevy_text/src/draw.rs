@@ -1,5 +1,4 @@
 use crate::{Font, FontAtlasSet, GlyphLayout};
-use ab_glyph::{PxScale, ScaleFont};
 use bevy_asset::Assets;
 use bevy_math::{Mat4, Vec2, Vec3};
 use bevy_render::{
@@ -14,6 +13,7 @@ use bevy_render::{
     },
 };
 use bevy_sprite::{TextureAtlas, TextureAtlasSprite};
+use glyph_brush_layout::ab_glyph::{PxScale, ScaleFont};
 
 #[derive(Clone, Debug)]
 pub struct TextStyle {
@@ -47,7 +47,7 @@ pub struct DrawableText<'a> {
 impl<'a> Drawable for DrawableText<'a> {
     fn draw(&mut self, draw: &mut Draw, context: &mut DrawContext) -> Result<(), DrawError> {
         // TODO:
-        // - Call `outline_glyph only` once and store the `OutlineGlyph`s
+        // - Call `outline_glyph` only once and store the `OutlineGlyph`s
         // - Provide other options for features (fixed / max width, h-align, multi-style text using sections)
         // - Test performance
         // - Likely performance win from caching

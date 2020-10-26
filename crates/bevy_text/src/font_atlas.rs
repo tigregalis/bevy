@@ -1,13 +1,15 @@
-use ab_glyph::GlyphId;
 use bevy_asset::{Assets, Handle};
 use bevy_math::Vec2;
 use bevy_render::texture::{Texture, TextureFormat};
 use bevy_sprite::{DynamicTextureAtlasBuilder, TextureAtlas};
 use bevy_utils::HashMap;
+use glyph_brush_layout::ab_glyph::GlyphId;
 
 pub struct FontAtlas {
     pub dynamic_texture_atlas_builder: DynamicTextureAtlasBuilder,
     pub glyph_to_index: HashMap<char, u32>,
+    // we can easily get the glyph id from a char using `scaled_font.glyph_id(c)`
+    // but there is no easy way to do the reverse, so we map these
     pub glyph_id_to_char: HashMap<GlyphId, char>,
     pub texture_atlas: Handle<TextureAtlas>,
 }

@@ -1,11 +1,13 @@
-use ab_glyph::{FontVec, Glyph, InvalidFont, OutlinedGlyph, Point, PxScale, ScaleFont};
-use glyph_brush_layout::{FontId, GlyphPositioner, Layout, SectionGeometry, SectionText};
 use bevy_math::Vec2;
 use bevy_render::{
     color::Color,
     texture::{Texture, TextureFormat},
 };
 use bevy_type_registry::TypeUuid;
+use glyph_brush_layout::{
+    ab_glyph::{FontVec, Glyph, InvalidFont, OutlinedGlyph, Point, PxScale, ScaleFont},
+    FontId, GlyphPositioner, Layout, SectionGeometry, SectionText,
+};
 
 #[derive(Debug, TypeUuid)]
 #[uuid = "97059ac6-c9ba-4da9-95b6-bed82c3ce198"]
@@ -56,26 +58,24 @@ impl Font {
         )
     }
 
-    pub fn build_relative_layout(
-        &self,
-        text: &str,
-        font_size: f32,
-    ) -> Vec<Glyph> {
+    pub fn build_relative_layout(&self, text: &str, font_size: f32) -> Vec<Glyph> {
+        // we can change this layout based on text options
         let mut section_glyphs = Layout::default_wrap().calculate_glyphs(
             &[&self.font],
             &SectionGeometry {
                 screen_position: (0.0, 0.0),
                 ..SectionGeometry::default()
             },
-            &[
-                SectionText {
-                    text,
-                    scale: PxScale::from(font_size),
-                    font_id: FontId(0),
-                },
-            ],
+            &[SectionText {
+                text,
+                scale: PxScale::from(font_size),
+                font_id: FontId(0),
+            }],
         );
-        let glyphs: Vec<Glyph> = section_glyphs.drain(..).map(|section_glyph| section_glyph.glyph).collect();
+        let glyphs: Vec<Glyph> = section_glyphs
+            .drain(..)
+            .map(|section_glyph| section_glyph.glyph)
+            .collect();
         glyphs
     }
 
