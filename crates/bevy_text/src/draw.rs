@@ -48,6 +48,8 @@ pub struct DrawableText<'a> {
 pub struct DrawableText<'a> {
     pub render_resource_bindings: &'a mut RenderResourceBindings,
     pub asset_render_resource_bindings: &'a mut AssetRenderResourceBindings,
+    pub position: Vec3,
+    pub style: &'a TextStyle,
     pub text_vertices: &'a TextVertices,
     pub msaa: &'a Msaa,
 }
@@ -84,6 +86,8 @@ impl<'a> Drawable for DrawableText<'a> {
         // set global bindings
         context.set_bind_groups_from_bindings(draw, &mut [self.render_resource_bindings])?;
 
+        let position = self.position;
+
         for tv in self.text_vertices.borrow() {
             let atlas_render_resource_bindings = self
                 .asset_render_resource_bindings
@@ -96,11 +100,11 @@ impl<'a> Drawable for DrawableText<'a> {
 
             let sprite = TextureAtlasSprite {
                 index: tv.atlas_info.glyph_index,
-                color: Color::WHITE, 
+                color: self.style.color, 
             };
 
             //let transform = Mat4::from_translation(Vec3::new(tv.position.x(), tv.position.y(), 0.));
-            let transform = Mat4::from_translation(Vec3::new(tv.position.x(), tv.position.y(), 0.));
+            let transform = Mat4::from_translation(position + tv.position.extend(0.));
 
             let transform_buffer = context
                 .shared_buffers

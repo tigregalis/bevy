@@ -1,5 +1,5 @@
 use crate::{error::TextError, Font, FontAtlas};
-use ab_glyph::{Glyph, GlyphId};
+use ab_glyph::{Glyph, GlyphId, Rect};
 use bevy_asset::{Assets, Handle};
 use bevy_core::FloatOrd;
 use bevy_math::Vec2;
@@ -49,7 +49,7 @@ impl FontAtlasSet {
         texture_atlases: &mut Assets<TextureAtlas>,
         textures: &mut Assets<Texture>,
         glyph: Glyph,
-    ) -> Result<GlyphAtlasInfo, TextError> {
+    ) -> Result<(GlyphAtlasInfo, Rect, ), TextError> {
         use ab_glyph::Font as ab_glyph_font;
         let font = fonts.get(&self.font).ok_or(TextError::NoSuchFont)?;
         let font_atlases = self
@@ -65,13 +65,16 @@ impl FontAtlasSet {
         let font_size = glyph.scale.y;
         let glyph_id = glyph.id;
         let outline = font.font.outline_glyph(glyph);
-        let glyph_texture = if let Some(outline) = outline {
-            Font::get_outlined_glyph_texture(outline)
+        let (glyph_texture, bounds) = if let Some(outline) = outline {
+            (Font::get_outlined_glyph_texture(outline), outline.px_bounds())
         } else {
-            Texture::new(
-                Vec2::new(1., 1.),
-                vec![0, 0, 0, 0],
-                TextureFormat::Rgba8UnormSrgb,
+            (
+                Texture::new(
+                    Vec2::new(1., 1.),
+                    vec![0, 0, 0, 0],
+                    TextureFormat::Rgba8UnormSrgb,
+                ),
+                Rect::default(),
             )
         };
         let add_char_to_font_atlas = |atlas: &mut FontAtlas| -> bool {
@@ -93,7 +96,7 @@ impl FontAtlasSet {
             }
         }
 
-        Ok(self.get_glyph_atlas_info(font_size, glyph_id).unwrap())
+        Ok((self.get_glyph_atlas_info(font_size, glyph_id).unwrap(), bounds))
     }
 
     pub fn get_glyph_atlas_info(

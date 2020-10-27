@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
-use ab_glyph::PxScale;
+use ab_glyph::{PxScale, ScaleFont};
 use bevy_asset::{Assets, Handle};
 use bevy_math::{Size, Vec2};
 use bevy_render::prelude::Texture;
 use bevy_sprite::TextureAtlas;
 
-use glyph_brush_layout::FontId;
+use glyph_brush_layout::{FontId, SectionText};
 
 use crate::{error::TextError, glyph_brush::GlyphBrush, Font, FontAtlasSet, TextVertex};
 
@@ -29,23 +29,26 @@ impl TextPipeline {
         font_handle: Handle<Font>,
         font_storage: &Assets<Font>,
         text: &str,
-        size: f32,
+        scale: f32,
         bounds: Size,
-    ) -> Result<Vec2, TextError> {
+    ) -> Result<Size<f32>, TextError> {
         let font = font_storage
             .get(font_handle.clone())
             .ok_or(TextError::NoSuchFont)?;
+
         let font_id = self.get_or_insert_font_id(font_handle, font);
 
-        let section = glyph_brush_layout::SectionText {
+        let section = SectionText {
             font_id,
-            scale: PxScale::from(size),
+            scale: PxScale::from(scale),
             text,
         };
 
-        let glyphs = self
+        let scaled_font = ab_glyph::Font::as_scaled(&font.font, scale);
+
+        let section_glyphs = self
             .brush
-            .compute_glyphs(&[section], bounds, Vec2::new(0., 0.))?;
+            .compute_glyphs(&[section], bounds)?;
         /*
         self.measure_brush
             .borrow_mut()
@@ -54,8 +57,15 @@ impl TextPipeline {
             */
 
         // todo: calculate total bounds
-
-        todo!()
+        let mut max_x: f32 = 0.0;
+        let mut max_y: f32 = 0.0;
+        for section_glyph in section_glyphs.iter() {
+            // let glyph_bounds = section_glyph.glyph.
+            max_x = max_x.max(section_glyph.glyph.position.x + scaled_font.h_advance(section_glyph.glyph.id));
+            max_y = max_y.max(section_glyph.glyph.position.y - scaled_font.descent());
+        }
+        let size = Size::new(max_x, max_y);
+        Ok(size)
     }
 
     pub fn get_or_insert_font_id(&mut self, handle: Handle<Font>, font: &Font) -> FontId {
@@ -70,27 +80,27 @@ impl TextPipeline {
         font_handle: Handle<Font>,
         font_storage: &Assets<Font>,
         text: &str,
-        size: f32,
+        font_size: f32,
         bounds: Size,
-        screen_position: Vec2,
+        // screen_position: Vec2,
     ) -> Result<(), TextError> {
         let font = font_storage
             .get(font_handle.clone())
             .ok_or(TextError::NoSuchFont)?;
         let font_id = self.get_or_insert_font_id(font_handle, font);
-
-        let section = glyph_brush_layout::SectionText {
+        
+        let section = SectionText {
             font_id,
-            scale: PxScale::from(size),
+            scale: PxScale::from(font_size),
             text,
         };
 
-        self.brush.queue_text(&[section], bounds, screen_position)?;
+        self.brush.queue_text(&[section], bounds)?;
 
         Ok(())
     }
 
-    pub fn draw_queued(
+    pub fn process_queued(
         &self,
         fonts: &Assets<Font>,
         font_atlas_set_storage: &mut Assets<FontAtlasSet>,

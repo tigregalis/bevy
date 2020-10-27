@@ -1,4 +1,4 @@
-use crate::{CalculatedSize, Node};
+use crate::{CalculatedSize, Node, Style, Val};
 use bevy_asset::{Assets, Handle};
 use bevy_ecs::{Changed, Entity, Local, Query, Res, ResMut, Resource};
 use bevy_math::{Size, Vec2};
@@ -11,6 +11,7 @@ use bevy_render::{
 use bevy_sprite::TextureAtlas;
 use bevy_text::{DrawableText, Font, FontAtlasSet, TextPipeline, TextStyle, TextVertex, TextVertices};
 use bevy_transform::{components::Transform, prelude::GlobalTransform};
+use std::collections::HashSet;
 
 #[derive(Debug, Default)]
 pub struct QueuedText {
@@ -30,28 +31,65 @@ pub fn text_system(
     mut font_atlas_sets: ResMut<Assets<FontAtlasSet>>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut text_pipeline: ResMut<TextPipeline>,
+    mut changed_text_query: Query<(Entity, Changed<Text>)>,
+    mut changed_style_query: Query<(Entity, Changed<Style>)>,
     mut text_query: Query<(
-        Changed<Text>,
+        Entity,
+        &Text,
+        &Style,
         &mut TextVertices,
-        &Node,
-        &Transform,
         &mut CalculatedSize,
     )>,
 ) {
-    for (text, mut vertices, node, trans, mut size) in &mut text_query.iter() {
-        let screen_position = trans.translation;
+    let mut entities = HashSet::new();
+
+    for (entity, _) in &mut changed_text_query.iter() {
+        entities.insert(entity);
+    }
+
+    for (entity, _) in &mut changed_style_query.iter() {
+        entities.insert(entity);
+    }
+
+    for (entity, text, style, mut vertices, mut calculated_size) in &mut text_query.iter() {
+        if !entities.contains(&entity) {
+            continue;
+        }
+
+        let node_size = Size::new(
+            match style.size.width {
+                Val::Auto => f32::MAX,
+                Val::Undefined => f32::MAX,
+                Val::Px(num) => num,
+                Val::Percent(_) => f32::MAX, // TODO: support percentages
+            },
+            match style.size.height {
+                Val::Auto => f32::MAX,
+                Val::Undefined => f32::MAX,
+                Val::Px(num) => num,
+                Val::Percent(_) => f32::MAX, // TODO: support percentages
+            },
+        );
+
         if let Err(e) = text_pipeline.queue_text(
             text.font.clone(),
             &fonts,
             &text.value,
             text.style.font_size,
-            Size::new(500., 500.),
-            Vec2::new(screen_position.x(), screen_position.y()),
+            node_size,
         ) {
             println!("Error when adding text to the queue: {:?}", e);
+        } else if let Ok(new_size) = text_pipeline.measure(
+            text.font.clone(),
+            &fonts,
+            &text.value,
+            text.style.font_size,
+            node_size,
+        ) {
+            calculated_size.size = new_size;
         }
 
-        match text_pipeline.draw_queued(
+        match text_pipeline.process_queued(
             &fonts,
             &mut font_atlas_sets,
             &mut texture_atlases,
@@ -69,15 +107,18 @@ pub fn draw_text_system(
     msaa: Res<Msaa>,
     mut render_resource_bindings: ResMut<RenderResourceBindings>,
     mut asset_render_resource_bindings: ResMut<AssetRenderResourceBindings>,
-    mut query: Query<(&mut Draw, &TextVertices, &GlobalTransform)>,
+    mut query: Query<(&mut Draw, &Text, &TextVertices, &Node, &GlobalTransform)>,
 ) {
     
-    for (mut draw, text_vertices, _) in &mut query.iter() {
-        let mut text_drawer = DrawableText {
+    for (mut draw, text, text_vertices, node, global_transform) in &mut query.iter() {
+            let position = global_transform.translation - (node.size / 2.0).extend(0.0);
+            let mut text_drawer = DrawableText {
             render_resource_bindings: &mut render_resource_bindings,
             asset_render_resource_bindings: &mut asset_render_resource_bindings,
+            position,
             msaa: &msaa,
             text_vertices,
+            style: &text.style,
         };
         text_drawer.draw(&mut draw, &mut context).unwrap();
     }

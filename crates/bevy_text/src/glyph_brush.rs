@@ -34,12 +34,12 @@ impl GlyphBrush {
         &self,
         sections: &[S],
         bounds: Size,
-        screen_position: Vec2,
+        // screen_position: Vec2,
     ) -> Result<Vec<SectionGlyph>, TextError> {
         // Todo: handle cache
         let geom = SectionGeometry {
             bounds: (bounds.width, bounds.height),
-            screen_position: (screen_position.x(), screen_position.y()),
+            // screen_position: (screen_position.x(), screen_position.y()),
             ..Default::default()
         };
         let section_glyphs = Layout::default().calculate_glyphs(&self.fonts, &geom, sections);
@@ -50,9 +50,10 @@ impl GlyphBrush {
         &self,
         sections: &[S],
         bounds: Size,
-        screen_position: Vec2,
+        // screen_position: Vec2,
     ) -> Result<(), TextError> {
-        let glyphs = self.compute_glyphs(sections, bounds, screen_position)?;
+        // let glyphs = self.compute_glyphs(sections, bounds, screen_position)?;
+        let glyphs = self.compute_glyphs(sections, bounds)?;
         let mut sq = self
             .section_queue
             .lock()
@@ -84,8 +85,9 @@ impl GlyphBrush {
                         .get_or_insert_with(handle_font_atlas, || {
                             FontAtlasSet::new(handle.clone())
                         });
-                    let position = glyph.glyph.position;
-                    let position = Vec2::new(position.x + glyph.glyph.scale.x/2., position.y - glyph.glyph.scale.y - glyph.glyph.scale.y /2. );
+                    // let position = glyph.glyph.position;
+                    // let position = Vec2::new(position.x + glyph.glyph.scale.x/2., position.y - glyph.glyph.scale.y - glyph.glyph.scale.y /2. );
+
                     let atlas_info = font_atlas_set
                         .get_glyph_atlas_info(glyph.glyph.scale.y, glyph.glyph.id)
                         .map(|gaf| Ok(gaf))
