@@ -9,7 +9,7 @@ use bevy_render::{
     texture::Texture,
 };
 use bevy_sprite::TextureAtlas;
-use bevy_text::{DrawableText, Font, FontAtlasSet, TextPipeline, TextStyle, TextVertex, TextVertices};
+use bevy_text::{DrawableText, Font, FontAtlasSet, TextPipeline, TextStyle, TextVertices};
 use bevy_transform::{components::Transform, prelude::GlobalTransform};
 use std::collections::HashSet;
 
@@ -109,10 +109,9 @@ pub fn draw_text_system(
     mut asset_render_resource_bindings: ResMut<AssetRenderResourceBindings>,
     mut query: Query<(&mut Draw, &Text, &TextVertices, &Node, &GlobalTransform)>,
 ) {
-    
     for (mut draw, text, text_vertices, node, global_transform) in &mut query.iter() {
-            let position = global_transform.translation - (node.size / 2.0).extend(0.0);
-            let mut text_drawer = DrawableText {
+        let position = global_transform.translation - (node.size / 2.0).extend(0.0);
+        let mut text_drawer = DrawableText {
             render_resource_bindings: &mut render_resource_bindings,
             asset_render_resource_bindings: &mut asset_render_resource_bindings,
             position,

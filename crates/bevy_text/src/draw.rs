@@ -1,7 +1,5 @@
-use crate::{glyph_brush::TextVertex, Font, FontAtlasSet, TextVertices};
-use ab_glyph::{Glyph, PxScale, ScaleFont};
-use bevy_asset::{Assets, Handle};
-use bevy_math::{Mat4, Vec2, Vec3};
+use crate::TextVertices;
+use bevy_math::{Mat4, Vec3};
 use bevy_render::{
     color::Color,
     draw::{Draw, DrawContext, DrawError, Drawable},
@@ -93,14 +91,11 @@ impl<'a> Drawable for DrawableText<'a> {
                 .asset_render_resource_bindings
                 .get_mut(&tv.atlas_info.texture_atlas)
                 .unwrap();
-            context.set_bind_groups_from_bindings(
-                draw,
-                &mut [atlas_render_resource_bindings],
-            )?;
+            context.set_bind_groups_from_bindings(draw, &mut [atlas_render_resource_bindings])?;
 
             let sprite = TextureAtlasSprite {
                 index: tv.atlas_info.glyph_index,
-                color: self.style.color, 
+                color: self.style.color,
             };
 
             //let transform = Mat4::from_translation(Vec3::new(tv.position.x(), tv.position.y(), 0.));

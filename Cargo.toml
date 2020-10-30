@@ -306,3 +306,6 @@ name = "assets_wasm"
 path = "examples/wasm/assets_wasm.rs"
 required-features = ["bevy_winit"]
 
+[[example]]
+name = "text_debug"
+path = "examples/ui/text_debug.rs"
