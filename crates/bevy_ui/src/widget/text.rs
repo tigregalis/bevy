@@ -1,6 +1,6 @@
 use crate::{CalculatedSize, Node, Style, Val};
 use bevy_asset::{Assets, Handle};
-use bevy_ecs::{Changed, Entity, Local, Query, Res, ResMut, Resource};
+use bevy_ecs::{Changed, Entity, Local, Or, Query, Res, ResMut, Resource};
 use bevy_math::{Size, Vec2};
 use bevy_render::{
     draw::{Draw, DrawContext, Drawable},
@@ -31,31 +31,13 @@ pub fn text_system(
     mut font_atlas_sets: ResMut<Assets<FontAtlasSet>>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut text_pipeline: ResMut<TextPipeline>,
-    mut changed_text_query: Query<(Entity, Changed<Text>)>,
-    mut changed_style_query: Query<(Entity, Changed<Style>)>,
     mut text_query: Query<(
-        Entity,
-        &Text,
-        &Style,
+        Or<(Changed<Text>, Changed<Style>)>,
         &mut TextVertices,
         &mut CalculatedSize,
     )>,
 ) {
-    let mut entities = HashSet::new();
-
-    for (entity, _) in &mut changed_text_query.iter() {
-        entities.insert(entity);
-    }
-
-    for (entity, _) in &mut changed_style_query.iter() {
-        entities.insert(entity);
-    }
-
-    for (entity, text, style, mut vertices, mut calculated_size) in &mut text_query.iter() {
-        if !entities.contains(&entity) {
-            continue;
-        }
-
+    for ((text, style), mut vertices, mut calculated_size) in &mut text_query.iter() {
         let node_size = Size::new(
             match style.size.width {
                 Val::Auto => f32::MAX,
@@ -71,6 +53,7 @@ pub fn text_system(
             },
         );
 
+        // TODO: add support for text alignment
         if let Err(e) = text_pipeline.queue_text(
             text.font.clone(),
             &fonts,
