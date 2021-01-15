@@ -34,14 +34,14 @@ fn infotext_system(commands: &mut Commands, asset_server: Res<AssetServer>) {
             ..Default::default()
         },
         text: Text {
-            sections: vec![TextSection {
+            sections: TextType::Simple(TextSection {
                 value: "This is\ntext with\nline breaks\nin the top left".to_string(),
                 font: font.clone(),
                 style: TextStyle {
                     font_size: 50.0,
                     color: Color::WHITE,
                 },
-            }],
+            }),
             alignment: TextAlignment::default(),
         },
         ..Default::default()
@@ -62,7 +62,7 @@ fn infotext_system(commands: &mut Commands, asset_server: Res<AssetServer>) {
             ..Default::default()
         },
         text: Text {
-            sections: vec![TextSection {
+            sections: TextType::Simple(TextSection {
                 value:
                     "This text is very long, has a limited width, is centred, is positioned in the top right and is also coloured pink."
                         .to_string(),
@@ -71,7 +71,7 @@ fn infotext_system(commands: &mut Commands, asset_server: Res<AssetServer>) {
                     font_size: 50.0,
                     color: Color::rgb(0.8, 0.2, 0.7),
                 },
-            }],
+            }),
             alignment: TextAlignment {
                 horizontal: HorizontalAlign::Center,
                 vertical: VerticalAlign::Center,
@@ -92,7 +92,7 @@ fn infotext_system(commands: &mut Commands, asset_server: Res<AssetServer>) {
                 ..Default::default()
             },
             text: Text {
-                sections: vec![
+                sections: TextType::Rich(vec![
                     TextSection {
                         value: "This text changes in the bottom right".to_string(),
                         font: font.clone(),
@@ -141,7 +141,7 @@ fn infotext_system(commands: &mut Commands, asset_server: Res<AssetServer>) {
                             color: Color::BLUE,
                         },
                     },
-                ],
+                ]),
                 alignment: TextAlignment::default(),
             },
             ..Default::default()
@@ -163,7 +163,7 @@ fn infotext_system(commands: &mut Commands, asset_server: Res<AssetServer>) {
             ..Default::default()
         },
         text: Text {
-            sections: vec![TextSection {
+            sections: TextType::Simple(TextSection {
                 value: "This\ntext has\nline breaks and also a set width in the bottom left"
                     .to_string(),
                 font,
@@ -171,7 +171,7 @@ fn infotext_system(commands: &mut Commands, asset_server: Res<AssetServer>) {
                     font_size: 50.0,
                     color: Color::WHITE,
                 },
-            }],
+            }),
             alignment: TextAlignment::default(),
         },
         ..Default::default()
@@ -199,14 +199,16 @@ fn change_text_system(
             }
         }
 
-        text.sections[0].value = format!(
-            "This text changes in the bottom right - {:.1} fps, {:.3} ms/frame",
-            fps,
-            frame_time * 1000.0,
-        );
+        if let TextType::Rich(ref mut sections) = text.sections {
+            sections[0].value = format!(
+                "This text changes in the bottom right - {:.1} fps, {:.3} ms/frame",
+                fps,
+                frame_time * 1000.0,
+            );
 
-        text.sections[2].value = format!("{:.1}", fps,);
+            sections[2].value = format!("{:.1}", fps,);
 
-        text.sections[4].value = format!("{:.3}", frame_time * 1000.0,);
+            sections[4].value = format!("{:.3}", frame_time * 1000.0,);
+        }
     }
 }

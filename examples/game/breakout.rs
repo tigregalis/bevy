@@ -68,7 +68,7 @@ fn setup(
         // scoreboard
         .spawn(TextBundle {
             text: Text {
-                sections: vec![
+                sections: TextType::Rich(vec![
                     TextSection {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         value: "Score: ".to_string(),
@@ -85,7 +85,7 @@ fn setup(
                             font_size: 60.0,
                         },
                     },
-                ],
+                ]),
                 ..Default::default()
             },
             style: Style {
@@ -203,7 +203,9 @@ fn ball_movement_system(time: Res<Time>, mut ball_query: Query<(&Ball, &mut Tran
 
 fn scoreboard_system(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text>) {
     for mut text in query.iter_mut() {
-        text.sections[1].value = scoreboard.score.to_string();
+        if let TextType::Rich(ref mut sections) = text.sections {
+            sections[1].value = scoreboard.score.to_string();
+        }
     }
 }
 

@@ -108,7 +108,7 @@ pub fn draw_text2d_system(
                 text_glyphs: &text_glyphs.glyphs,
                 font_quad_vertex_descriptor: &vertex_buffer_descriptor,
                 scale_factor,
-                sections: &text.sections,
+                sections: text.sections.to_text_sections(),
             };
 
             drawable_text.draw(&mut draw, &mut context).unwrap();
@@ -159,7 +159,7 @@ pub fn text2d_system(
             match text_pipeline.queue_text(
                 entity,
                 &fonts,
-                &text.sections,
+                text.sections.to_text_sections(),
                 scale_factor,
                 text.alignment,
                 Size::new(f32::MAX, f32::MAX),

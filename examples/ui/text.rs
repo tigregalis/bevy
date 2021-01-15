@@ -21,7 +21,9 @@ fn text_update_system(diagnostics: Res<Diagnostics>, mut query: Query<&mut Text,
     for mut text in query.iter_mut() {
         if let Some(fps) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
             if let Some(average) = fps.average() {
-                text.sections[1].value = format!("{:.2}", average);
+                if let TextType::Rich(ref mut sections) = text.sections {
+                    sections[1].value = format!("{:.2}", average);
+                }
             }
         }
     }
@@ -38,7 +40,7 @@ fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
                 ..Default::default()
             },
             text: Text {
-                sections: vec![
+                sections: TextType::Rich(vec![
                     TextSection {
                         value: "FPS: ".to_string(),
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
@@ -55,7 +57,7 @@ fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
                             color: Color::RED,
                         },
                     },
-                ],
+                ]),
                 ..Default::default()
             },
             ..Default::default()

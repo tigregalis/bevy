@@ -103,14 +103,14 @@ fn infotext_system(commands: &mut Commands, asset_server: Res<AssetServer>) {
             ..Default::default()
         },
         text: Text {
-            sections: vec![TextSection {
+            sections: TextType::Simple(TextSection {
                 value: "Nothing to see in this window! Check the console output!".to_string(),
                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                 style: TextStyle {
                     font_size: 50.0,
                     color: Color::WHITE,
                 },
-            }],
+            }),
             ..Default::default()
         },
         ..Default::default()

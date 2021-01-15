@@ -54,7 +54,7 @@ fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
         .spawn(CameraUiBundle::default())
         .spawn(TextBundle {
             text: Text {
-                sections: vec![
+                sections: TextType::Rich(vec![
                     TextSection {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         value: "Bird Count: ".to_string(),
@@ -87,7 +87,7 @@ fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
                             font_size: 40.0,
                         },
                     },
-                ],
+                ]),
                 ..Default::default()
             },
             style: Style {
@@ -178,8 +178,10 @@ fn counter_system(
     if let Some(fps) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
         if let Some(average) = fps.average() {
             for mut text in query.iter_mut() {
-                text.sections[1].value = format!("{}", counter.count);
-                text.sections[3].value = format!("{:.2}", average);
+                if let TextType::Rich(ref mut sections) = text.sections {
+                    sections[1].value = format!("{}", counter.count);
+                    sections[3].value = format!("{:.2}", average);
+                }
             }
         }
     };

@@ -94,7 +94,7 @@ pub fn text_system(
             match text_pipeline.queue_text(
                 entity,
                 &fonts,
-                &text.sections,
+                text.sections.to_text_sections(),
                 scale_factor,
                 text.alignment,
                 node_size,
@@ -159,7 +159,7 @@ pub fn draw_text_system(
                 msaa: &msaa,
                 text_glyphs: &text_glyphs.glyphs,
                 font_quad_vertex_descriptor: &vertex_buffer_descriptor,
-                sections: &text.sections,
+                sections: text.sections.to_text_sections(),
             };
 
             drawable_text.draw(&mut draw, &mut context).unwrap();

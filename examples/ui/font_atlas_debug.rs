@@ -68,8 +68,10 @@ fn text_update_system(mut state: ResMut<State>, time: Res<Time>, mut query: Quer
     if state.timer.tick(time.delta_seconds()).finished() {
         for mut text in query.iter_mut() {
             let c = rand::random::<u8>() as char;
-            if !text.sections[0].value.contains(c) {
-                text.sections[0].value.push(c);
+            if let TextType::Simple(ref mut section) = text.sections {
+                if !section.value.contains(c) {
+                    section.value.push(c);
+                }
             }
         }
 
@@ -82,14 +84,14 @@ fn setup(commands: &mut Commands, asset_server: Res<AssetServer>, mut state: Res
     state.handle = font_handle.clone();
     commands.spawn(CameraUiBundle::default()).spawn(TextBundle {
         text: Text {
-            sections: vec![TextSection {
+            sections: TextType::Simple(TextSection {
                 value: "a".to_string(),
                 font: font_handle,
                 style: TextStyle {
                     font_size: 60.0,
                     color: Color::MIDNIGHT_BLUE,
                 },
-            }],
+            }),
             ..Default::default()
         },
         ..Default::default()
