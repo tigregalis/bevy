@@ -112,8 +112,8 @@ fn setup(
                 align_self: AlignSelf::FlexEnd,
                 ..Default::default()
             },
-            text: Text {
-                sections: TextType::Rich(vec![
+            text: Text::Rich(RichText {
+                sections: vec![
                     TextSection {
                         value: "Contributor showcase".to_string(),
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
@@ -130,9 +130,9 @@ fn setup(
                             color: Color::WHITE,
                         },
                     },
-                ]),
+                ],
                 ..Default::default()
-            },
+            }),
             ..Default::default()
         });
 
@@ -207,11 +207,9 @@ fn select(
 
     trans.translation.z = 100.0;
 
-    if let TextType::Rich(ref mut sections) = text.sections {
-        sections[0].value = "Contributor: ".to_string();
-        sections[1].value = name.to_string();
-        sections[1].style.color = mat.color;
-    }
+    text.sections_mut()[0].value = "Contributor: ".to_string();
+    text.sections_mut()[1].value = name.to_string();
+    text.sections_mut()[1].style.color = mat.color;
 
     Some(())
 }

@@ -68,10 +68,8 @@ fn text_update_system(mut state: ResMut<State>, time: Res<Time>, mut query: Quer
     if state.timer.tick(time.delta_seconds()).finished() {
         for mut text in query.iter_mut() {
             let c = rand::random::<u8>() as char;
-            if let TextType::Simple(ref mut section) = text.sections {
-                if !section.value.contains(c) {
-                    section.value.push(c);
-                }
+            if !text.section().value.contains(c) {
+                text.section_mut().value.push(c);
             }
         }
 
@@ -83,17 +81,17 @@ fn setup(commands: &mut Commands, asset_server: Res<AssetServer>, mut state: Res
     let font_handle = asset_server.load("fonts/FiraSans-Bold.ttf");
     state.handle = font_handle.clone();
     commands.spawn(CameraUiBundle::default()).spawn(TextBundle {
-        text: Text {
-            sections: TextType::Simple(TextSection {
+        text: Text::Basic(BasicText {
+            section: TextSection {
                 value: "a".to_string(),
                 font: font_handle,
                 style: TextStyle {
                     font_size: 60.0,
                     color: Color::MIDNIGHT_BLUE,
                 },
-            }),
+            },
             ..Default::default()
-        },
+        }),
         ..Default::default()
     });
 }

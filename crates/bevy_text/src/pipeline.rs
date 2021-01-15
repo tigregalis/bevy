@@ -55,7 +55,7 @@ impl<ID: Hash + Eq> TextPipeline<ID> {
         fonts: &Assets<Font>,
         sections: &[TextSection],
         scale_factor: f64,
-        text_alignment: TextAlignment,
+        text_alignment: &TextAlignment,
         bounds: Size,
         font_atlas_set_storage: &mut Assets<FontAtlasSet>,
         texture_atlases: &mut Assets<TextureAtlas>,

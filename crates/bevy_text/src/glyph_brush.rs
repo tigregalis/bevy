@@ -30,7 +30,7 @@ impl GlyphBrush {
         &self,
         sections: &[S],
         bounds: Size,
-        text_alignment: TextAlignment,
+        text_alignment: &TextAlignment,
     ) -> Result<Vec<SectionGlyph>, TextError> {
         let geom = SectionGeometry {
             bounds: (bounds.width, bounds.height),

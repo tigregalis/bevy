@@ -51,17 +51,17 @@ fn setup(
                             align_self: AlignSelf::FlexEnd,
                             ..Default::default()
                         },
-                        text: Text {
-                            sections: TextType::Simple(TextSection {
+                        text: Text::Basic(BasicText {
+                            section: TextSection {
                                 value: "Example text".to_string(),
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 style: TextStyle {
                                     font_size: 30.0,
                                     color: Color::WHITE,
                                 },
-                            }),
+                            },
                             ..Default::default()
-                        },
+                        }),
                         ..Default::default()
                     });
                 });

@@ -22,7 +22,8 @@ pub use text2d::*;
 
 pub mod prelude {
     pub use crate::{
-        Font, Text, Text2dBundle, TextAlignment, TextError, TextSection, TextStyle, TextType,
+        BasicText, Font, RichText, Text, Text2dBundle, TextAlignment, TextError, TextSection,
+        TextStyle,
     };
     pub use glyph_brush_layout::{HorizontalAlign, VerticalAlign};
 }

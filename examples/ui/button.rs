@@ -39,21 +39,15 @@ fn button_system(
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Clicked => {
-                if let TextType::Simple(ref mut section) = text.sections {
-                    section.value = "Press".to_string();
-                }
+                text.section_mut().value = "Press".to_string();
                 *material = button_materials.pressed.clone();
             }
             Interaction::Hovered => {
-                if let TextType::Simple(ref mut section) = text.sections {
-                    section.value = "Hover".to_string();
-                }
+                text.section_mut().value = "Hover".to_string();
                 *material = button_materials.hovered.clone();
             }
             Interaction::None => {
-                if let TextType::Simple(ref mut section) = text.sections {
-                    section.value = "Button".to_string();
-                }
+                text.section_mut().value = "Button".to_string();
                 *material = button_materials.normal.clone();
             }
         }
@@ -84,17 +78,17 @@ fn setup(
         })
         .with_children(|parent| {
             parent.spawn(TextBundle {
-                text: Text {
-                    sections: TextType::Simple(TextSection {
+                text: Text::Basic(BasicText {
+                    section: TextSection {
                         value: "Button".to_string(),
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         style: TextStyle {
                             font_size: 40.0,
                             color: Color::rgb(0.9, 0.9, 0.9),
                         },
-                    }),
+                    },
                     ..Default::default()
-                },
+                }),
                 ..Default::default()
             });
         });

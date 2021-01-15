@@ -52,8 +52,8 @@ fn setup_menu(
         })
         .with_children(|parent| {
             parent.spawn(TextBundle {
-                text: Text {
-                    sections: TextType::Simple(TextSection {
+                text: Text::Basic(BasicText {
+                    section: (TextSection {
                         value: "Play".to_string(),
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         style: TextStyle {
@@ -62,7 +62,7 @@ fn setup_menu(
                         },
                     }),
                     ..Default::default()
-                },
+                }),
                 ..Default::default()
             });
         });
