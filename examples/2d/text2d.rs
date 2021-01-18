@@ -14,7 +14,7 @@ fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
         .spawn(Camera2dBundle::default())
         .spawn(Text2dBundle {
             text: Text {
-                value: "This text is in the 2D scene.".to_string(),
+                value: "This text is in the 2D scene".to_string(),
                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                 style: TextStyle {
                     font_size: 60.0,
