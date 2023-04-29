@@ -489,8 +489,15 @@ fn update_ui(
     }
     text.clear();
     if *hide_ui {
+        if !text_query.single().sections[0].value.is_empty() {
+            // single_mut() always triggers change detection,
+            // so only access if text actually needs changing
+            text_query.single_mut().sections[0].value.clear();
+        }
         return;
     }
+
+    let mut text = String::with_capacity(text_query.single().sections[0].value.len());
 
     let scn = current_scene.0;
     text.push_str("(H) Hide UI\n\n");
@@ -594,6 +601,12 @@ fn update_ui(
 
     if current_scene.0 == 1 {
         text.push_str("(Enter) Reset all to scene recommendation\n");
+    }
+
+    if text != text_query.single().sections[0].value {
+        // single_mut() always triggers change detection,
+        // so only access if text actually changed
+        text_query.single_mut().sections[0].value = text;
     }
 }
 
