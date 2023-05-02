@@ -113,6 +113,9 @@ pub fn measure_text_system(
                 Err(TextError::NoSuchFont) => {
                     new_queue.push(entity);
                 }
+                Err(e @ TextError::FailedToAddGlyphOld(_)) => {
+                    panic!("Fatal error when processing text: {e}.");
+                }
                 Err(e @ TextError::FailedToAddGlyph(_)) => {
                     panic!("Fatal error when processing text: {e}.");
                 }
@@ -199,6 +202,9 @@ pub fn text_system(
                     // There was an error processing the text layout, let's add this entity to the
                     // queue for further processing
                     new_queue.push(entity);
+                }
+                Err(e @ TextError::FailedToAddGlyphOld(_)) => {
+                    panic!("Fatal error when processing text: {e}.");
                 }
                 Err(e @ TextError::FailedToAddGlyph(_)) => {
                     panic!("Fatal error when processing text: {e}.");
