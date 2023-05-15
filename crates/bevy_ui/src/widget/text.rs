@@ -19,7 +19,6 @@ fn scale_value(value: f32, factor: f64) -> f32 {
     (value as f64 * factor) as f32
 }
 
-#[derive(Clone)]
 pub struct TextMeasure {
     pub info: TextMeasureInfo,
 }
@@ -119,6 +118,9 @@ pub fn measure_text_system(
                 Err(e @ TextError::FailedToAddGlyph(_)) => {
                     panic!("Fatal error when processing text: {e}.");
                 }
+                Err(e @ TextError::FailedToAcquireMutex) => {
+                    panic!("Fatal error when processing text: {e}.");
+                }
             };
         }
     }
@@ -207,6 +209,9 @@ pub fn text_system(
                     panic!("Fatal error when processing text: {e}.");
                 }
                 Err(e @ TextError::FailedToAddGlyph(_)) => {
+                    panic!("Fatal error when processing text: {e}.");
+                }
+                Err(e @ TextError::FailedToAcquireMutex) => {
                     panic!("Fatal error when processing text: {e}.");
                 }
                 Ok(info) => {
