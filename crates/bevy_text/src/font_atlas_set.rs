@@ -17,19 +17,13 @@ pub struct FontAtlasSet {
 }
 
 #[derive(Debug, Clone)]
-pub struct GlyphAtlasInfoNew {
+pub struct GlyphAtlasInfo {
     pub texture_atlas: Handle<TextureAtlas>,
     pub glyph_index: usize,
     pub left: i32,
     pub top: i32,
     pub width: u32,
     pub height: u32,
-}
-
-#[derive(Debug, Clone)]
-pub struct GlyphAtlasInfo {
-    pub texture_atlas: Handle<TextureAtlas>,
-    pub glyph_index: usize,
 }
 
 impl Default for FontAtlasSet {
@@ -60,7 +54,7 @@ impl FontAtlasSet {
         font_system: &mut cosmic_text::FontSystem,
         swash_cache: &mut cosmic_text::SwashCache,
         layout_glyph: &cosmic_text::LayoutGlyph,
-    ) -> Result<GlyphAtlasInfoNew, TextError> {
+    ) -> Result<GlyphAtlasInfo, TextError> {
         let font_atlases = self
             .font_atlases
             .entry(layout_glyph.cache_key.font_size_bits)
@@ -120,7 +114,7 @@ impl FontAtlasSet {
     pub fn get_glyph_atlas_info(
         &mut self,
         cache_key: cosmic_text::CacheKey,
-    ) -> Option<GlyphAtlasInfoNew> {
+    ) -> Option<GlyphAtlasInfo> {
         self.font_atlases
             .get(&cache_key.font_size_bits)
             .and_then(|font_atlases| {
@@ -132,7 +126,7 @@ impl FontAtlasSet {
                             .map(|glyph_index| (glyph_index, atlas.texture_atlas.clone_weak()))
                     })
                     .map(
-                        |((glyph_index, left, top, w, h), texture_atlas)| GlyphAtlasInfoNew {
+                        |((glyph_index, left, top, w, h), texture_atlas)| GlyphAtlasInfo {
                             texture_atlas,
                             glyph_index,
                             left,
@@ -153,7 +147,7 @@ impl FontAtlasSet {
 pub struct PositionedGlyph {
     pub position: Vec2,
     pub size: Vec2,
-    pub atlas_info: GlyphAtlasInfoNew,
+    pub atlas_info: GlyphAtlasInfo,
     pub section_index: usize,
     /// In order to do text editing, we need access to the size of glyphs and their index in the associated String.
     /// For example, to figure out where to place the cursor in an input box from the mouse's position.
