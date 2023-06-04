@@ -113,7 +113,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         ]
                         .join("  ·  "),
                         TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf").into(),
                             font_size: 18.0,
                             color: Color::WHITE,
                         },
@@ -188,7 +188,7 @@ fn spawn_text(
         parent.spawn(TextBundle::from_section(
             "Bevy",
             TextStyle {
-                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font: asset_server.load("fonts/FiraSans-Bold.ttf").into(),
                 font_size: 120.0,
                 color: Color::WHITE,
             },
