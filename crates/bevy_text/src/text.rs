@@ -154,6 +154,10 @@ pub enum TextAlignment {
     /// Rightmost character is immediately to the left of the render position.<br/>
     /// Bounds start from the render position and advance leftwards.
     Right,
+    /// Rightmost character is immediately to the left of the render position.<br/>
+    /// Leftmost character is immediately to the right of the render position.<br/>
+    /// Bounds start from the render position and advance equally left & right.
+    Justified,
 }
 
 /// Describes the style of a [`TextSection`].

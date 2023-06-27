@@ -93,6 +93,7 @@ impl TextPipeline {
         linebreak_behavior: BreakLineOn,
         bounds: Vec2,
         scale_factor: f64,
+        text_alignment: TextAlignment,
     ) -> Result<Buffer, TextError> {
         // TODO: Support multiple section font sizes, pending upstream implementation in cosmic_text
         // For now, just use the first section's size or a default
@@ -156,6 +157,13 @@ impl TextPipeline {
         });
         let mut maybe_line = lines_iter.next();
 
+        let align = Some(match text_alignment {
+            TextAlignment::Left => cosmic_text::Align::Left,
+            TextAlignment::Center => cosmic_text::Align::Center,
+            TextAlignment::Right => cosmic_text::Align::Right,
+            TextAlignment::Justified => cosmic_text::Align::Justified,
+        });
+
         loop {
             let (Some(line_range), Some((section, section_index, section_range))) = (&maybe_line, &maybe_section) else {
                 // this is reached only if this text is empty
@@ -193,12 +201,14 @@ impl TextPipeline {
                     let prev_attrs_list =
                         std::mem::replace(&mut attrs_list, AttrsList::new(Attrs::new()));
                     let prev_line_string = std::mem::take(&mut line_string);
-                    buffer
-                        .lines
-                        .push(BufferLine::new(prev_line_string, prev_attrs_list));
+                    let mut buffer_line = BufferLine::new(prev_line_string, prev_attrs_list);
+                    buffer_line.set_align(align);
+                    buffer.lines.push(buffer_line);
                 } else {
                     // finalize the final line
-                    buffer.lines.push(BufferLine::new(line_string, attrs_list));
+                    let mut buffer_line = BufferLine::new(line_string, attrs_list);
+                    buffer_line.set_align(align);
+                    buffer.lines.push(buffer_line);
                     break;
                 }
             }
@@ -255,8 +265,14 @@ impl TextPipeline {
             return Ok(TextLayoutInfo::default());
         }
 
-        let buffer =
-            self.create_buffer(fonts, sections, linebreak_behavior, bounds, scale_factor)?;
+        let buffer = self.create_buffer(
+            fonts,
+            sections,
+            linebreak_behavior,
+            bounds,
+            scale_factor,
+            text_alignment,
+        )?;
 
         let font_system = &mut acquire_font_system(&mut self.font_system)?;
         let swash_cache = &mut self.swash_cache.0;
@@ -324,11 +340,6 @@ impl TextPipeline {
                 let y = line_y + layout_glyph.y_int as f32 - top + glyph_size.y / 2.0;
                 // TODO: use cosmic text's implementation (per-BufferLine alignment) as it will be editor aware
                 // see https://github.com/pop-os/cosmic-text/issues/130 (currently bugged)
-                let x = x + match text_alignment {
-                    TextAlignment::Left => 0.0,
-                    TextAlignment::Center => (box_size.x - line_w) / 2.0,
-                    TextAlignment::Right => box_size.x - line_w,
-                };
                 let y = match y_axis_orientation {
                     YAxisOrientation::TopToBottom => y,
                     YAxisOrientation::BottomToTop => box_size.y - y,
@@ -369,7 +380,7 @@ impl TextPipeline {
         sections: &[TextSection],
         scale_factor: f64,
         // TODO: not currently required
-        _text_alignment: TextAlignment,
+        text_alignment: TextAlignment,
         linebreak_behavior: BreakLineOn,
     ) -> Result<TextMeasureInfo, TextError> {
         const MIN_WIDTH_CONTENT_BOUNDS: Vec2 = Vec2::new(0.0, f32::INFINITY);
@@ -381,6 +392,7 @@ impl TextPipeline {
             linebreak_behavior,
             MIN_WIDTH_CONTENT_BOUNDS,
             scale_factor,
+            text_alignment,
         )?;
 
         let min_width_content_size = buffer_dimensions(&buffer);
@@ -549,7 +561,7 @@ fn buffer_dimensions(buffer: &Buffer) -> Vec2 {
     let width = buffer
         .layout_runs()
         .map(|run| run.line_w)
-        .reduce(|max_w, w| max_w.max(w))
+        .reduce(f32::max)
         .unwrap();
     // TODO: support multiple line heights / font sizes (once supported by cosmic text), see https://github.com/pop-os/cosmic-text/issues/64
     let line_height = buffer.metrics().line_height.ceil();
